@@ -1,11 +1,28 @@
-const express = require('express')
-const app = express()
-const port = 3000
+const app = require("./app");
+const config = require("./config");
+const port = config.port || 5000;
+const { MongoClient, ServerApiVersion } = require("mongodb");
+const uri = `mongodb+srv://${config.database_usernames}:${config.database_passwords}@cluster0.cqqhz9d.mongodb.net/?retryWrites=true&w=majority`;
 
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+async function run() {
+  try {
+    await client.connect();
+    app.listen(port, () => {
+      console.log(
+        `🛢 Database is connected successfully & application is listening on port ${port}`
+      );
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+run().catch(console.dir);

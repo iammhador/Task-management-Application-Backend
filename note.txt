@@ -1,0 +1,40 @@
+Task management Application
+
+Description:
+You are tasked with building a simple Task Management Application using the MERN stack (MongoDB, Express, React, Node.js) along with the Next.js framework/ React. The application should allow users to create, update, delete, and view tasks. The user interface should be designed using Tailwind CSS. Additionally, you are required to implement form handling using React Hook Form, along with the inclusion of toast notifications and popups for user feedback and interactions.
+
+Requirements:
+Backend:
+Set up a Node.js server using Express.js.
+Utilize MongoDB for data storage. Design a schema for the tasks.
+Implement RESTful API endpoints for CRUD operations on tasks.
+
+Frontend:
+Use Next.js or React.js to create the front end of the application.
+Design the user interface using Tailwind CSS for styling and layout.
+Implement React Hook Form for handling forms related to task creation and updates.
+Integrate toast notifications for displaying success or error messages to the user.
+Include popup functionality for confirmation dialogs or additional task details.
+
+Authentication and Authorization (Optional):
+Implement user authentication using JWT (JSON Web Tokens) and bcrypt for password hashing.
+Create a registration page and a login page.
+Ensure that only authenticated users can access the task management functionalities.
+
+Additional Features (Optional):
+Implement sorting and filtering options for tasks.
+Provide a search functionality to search for specific tasks.
+Add pagination for task lists.
+
+Guidelines:
+Use proper error handling and validation techniques throughout the application.
+Maintain a clean and organized code structure, following best practices and standards.
+Utilize Git for version control and commit regularly with descriptive commit messages.
+Document the API endpoints and any complex logic with comments for better understanding.
+Submission:
+
+Provide a GitHub repository link containing the codebase and necessary instructions to run the application locally.
+Include a README file with a brief description, instructions for setup, and any additional information the reviewer should know.
+Note: Feel free to use any additional libraries or tools that you deem necessary to complete the task.
+
+Good luck!
