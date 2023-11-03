@@ -4,7 +4,7 @@
   "description": " A comprehensive task management application that allows users to efficiently organize, track, and prioritize their tasks and projects. The application provides an intuitive interface for creating, editing, and deleting tasks, as well as setting deadlines and reminders. Users can categorize tasks into different sections, assign labels, and set priority levels to ensure effective time management. Additionally, the application offers features such as task filtering, search functionality, and user authentication to ensure data security and privacy.",
   "main": "index.js",
   "scripts": {
-    "start": "node ./src/server.js",
+    "start": "node-dev ./src/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "iammhador",
@@ -16,6 +16,7 @@
     "express": "^4.18.2",
     "http-status": "^1.7.3",
     "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.2.0"
+    "mongodb": "^6.2.0",
+    "node-dev": "^8.0.0"
   }
 }

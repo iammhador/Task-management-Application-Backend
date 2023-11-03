@@ -6,6 +6,7 @@ const { MongoClient, ServerApiVersion } = require("mongodb");
 const uri = `mongodb+srv://${config.database_usernames}:${config.database_passwords}@cluster0.cqqhz9d.mongodb.net/?retryWrites=true&w=majority`;
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
+const { ObjectId } = require("mongodb");
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -26,6 +27,7 @@ async function run() {
 
 //@ Database Collection =>
 const userCollection = client.db("task_management").collection("users");
+const taskCollection = client.db("task_management").collection("tasks");
 
 //@ Register A New User =>
 app.post("/api/v1/auth/register", async (req, res) => {
@@ -41,7 +43,12 @@ app.post("/api/v1/auth/register", async (req, res) => {
         }
       });
     });
-    const result = await userCollection.insertOne({ email, hashPassword });
+    const result = await userCollection.insertOne({
+      email,
+      hashPassword,
+      createdAt: now,
+      updatedAt: now,
+    });
     res
       .status(httpStatus.OK)
       .json({ message: "User created successfully", data: result });
@@ -81,6 +88,123 @@ app.post("/api/v1/auth/login", async (req, res) => {
         .status(httpStatus.OK)
         .json({ message: "User found successfully", data: { user, token } });
     });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
+//@ All Users =>
+app.get("/api/v1/auth", async (req, res) => {
+  try {
+    const result = await userCollection.find().toArray();
+    res
+      .status(httpStatus.OK)
+      .json({ message: "All users found successfully", data: result });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
+//@ Get All Task =>
+
+app.get("/api/v1/task", async (req, res) => {
+  try {
+    const result = await taskCollection.find({}).toArray();
+
+    res
+      .status(httpStatus.OK)
+      .json({ message: "All task found successfully", data: result });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
+//@ Get Single Task By Using UserId =>
+app.get("/api/v1/task/:id", async (req, res) => {
+  try {
+    const result = await taskCollection.findOne({ userId: req.params.id });
+    res
+      .status(httpStatus.OK)
+      .json({ message: "Single task found successfully", data: result });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
+//@ Create A New Task =>
+app.post("/api/v1/task", async (req, res) => {
+  try {
+    const result = await taskCollection.insertOne({
+      ...req.body,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    if (!result) {
+      res
+        .status(httpStatus.CONFLICT)
+        .json({ message: "Failed to create a new task", data: result });
+    }
+    res
+      .status(httpStatus.OK)
+      .json({ message: "New task created successfully", data: result });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
+//@ Update A Task =>
+app.patch("/api/v1/task/:id", async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const data = req.body;
+
+    let updateData = {};
+    if (data.title) {
+      updateData.title = data.title;
+    }
+    if (data.description) {
+      updateData.description = data.description;
+    }
+
+    const result = await taskCollection.updateOne(
+      { _id: new ObjectId(taskId) },
+      { $set: updateData }
+    );
+    res
+      .status(httpStatus.OK)
+      .json({ message: "Task updated successfully", data: result });
+  } catch (error) {
+    res
+      .status(httpStatus.INTERNAL_SERVER_ERROR)
+      .json({ message: "Internal server error", error: error.message });
+  }
+});
+
+//@ Delete A Task =>
+app.delete("/api/v1/task/:id", async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const result = await taskCollection.deleteOne({
+      _id: new ObjectId(taskId),
+    });
+    if (result.deletedCount === 0) {
+      return res
+        .status(httpStatus.NOT_FOUND)
+        .json({ message: "Task not found for deletion" });
+    }
+    return res
+      .status(httpStatus.OK)
+      .json({ message: "Task deleted successfully", data: result });
   } catch (error) {
     res
       .status(httpStatus.INTERNAL_SERVER_ERROR)
