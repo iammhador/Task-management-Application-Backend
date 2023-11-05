@@ -32,8 +32,14 @@ const taskCollection = client.db("task_management").collection("tasks");
 //@ Register A New User =>
 app.post("/api/v1/auth/register", async (req, res) => {
   try {
-    const saltRounds = 10;
     const { email, password } = req.body;
+    const existingUser = await userCollection.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(httpStatus.BAD_REQUEST)
+        .json({ message: "Email already exists" });
+    }
+    const saltRounds = 10;
     let hashPassword = await new Promise((resolve, reject) => {
       bcrypt.hash(password, saltRounds, function (err, hash) {
         if (err) {
@@ -46,8 +52,8 @@ app.post("/api/v1/auth/register", async (req, res) => {
     const result = await userCollection.insertOne({
       email,
       hashPassword,
-      createdAt: now,
-      updatedAt: now,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
     res
       .status(httpStatus.OK)
@@ -83,7 +89,6 @@ app.post("/api/v1/auth/login", async (req, res) => {
         config.jwt_secret,
         { expiresIn: config.jwt_expires_In }
       );
-      console.log(token);
       res
         .status(httpStatus.OK)
         .json({ message: "User found successfully", data: { user, token } });
@@ -125,17 +130,39 @@ app.get("/api/v1/task", async (req, res) => {
   }
 });
 
-//@ Get Single Task By Using UserId =>
+//@ Get Single Task =>
 app.get("/api/v1/task/:id", async (req, res) => {
   try {
-    const result = await taskCollection.findOne({ userId: req.params.id });
-    res
-      .status(httpStatus.OK)
-      .json({ message: "Single task found successfully", data: result });
+    const result = await taskCollection.findOne({
+      _id: new ObjectId(req.params.id),
+    });
+    res.status(httpStatus.OK).json({
+      message: "Specific user task found successfully",
+      data: result,
+    });
   } catch (error) {
-    res
-      .status(httpStatus.INTERNAL_SERVER_ERROR)
-      .json({ message: "Internal server error", error: error.message });
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+});
+
+//@ Get Single Task By Using UserId =>
+app.get("/api/v1/task/user/:id", async (req, res) => {
+  try {
+    const result = await taskCollection
+      .find({ userId: req.params.id })
+      .toArray();
+    res.status(httpStatus.OK).json({
+      message: "Specific user task found successfully",
+      data: result,
+    });
+  } catch (error) {
+    res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
+      message: "Internal server error",
+      error: error.message,
+    });
   }
 });
 
