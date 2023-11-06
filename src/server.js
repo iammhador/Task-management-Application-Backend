@@ -150,12 +150,39 @@ app.get("/api/v1/task/:id", async (req, res) => {
 
 //@ Get Single Task By Using UserId =>
 app.get("/api/v1/task/user/:id", async (req, res) => {
+  const { searchParams, page, limit, sortBy, sortOrder } = req.query;
+  let query = { userId: req.params.id };
+
+  if (searchParams) {
+    query.$or = [
+      { title: { $regex: searchParams, $options: "i" } },
+      { description: { $regex: searchParams, $options: "i" } },
+    ];
+  }
+
+  const sortOptions = {};
+  if (sortBy && sortOrder) {
+    sortOptions[sortBy] = sortOrder === "desc" ? -1 : 1;
+  }
+
   try {
+    const pageNumber = parseInt(page) || 1;
+    const pageSize = parseInt(limit) || 6;
+    const skip = (pageNumber - 1) * pageSize;
+    const totalCount = await taskCollection.countDocuments(query);
     const result = await taskCollection
-      .find({ userId: req.params.id })
+      .find(query)
+      .skip(skip)
+      .limit(pageSize)
+      .sort(sortOptions)
       .toArray();
     res.status(httpStatus.OK).json({
       message: "Specific user task found successfully",
+      meta: {
+        totalCount: totalCount,
+        currentPage: pageNumber,
+        totalPages: Math.ceil(totalCount / pageSize),
+      },
       data: result,
     });
   } catch (error) {
