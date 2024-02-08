@@ -230,6 +230,14 @@ app.patch("/api/v1/task/:id", async (req, res) => {
       updateData.description = data.description;
     }
 
+    if (data.priority) {
+      updateData.priority = data.priority;
+    }
+
+    if (data.status) {
+      updateData.status = data.status;
+    }
+
     const result = await taskCollection.updateOne(
       { _id: new ObjectId(taskId) },
       { $set: updateData }
